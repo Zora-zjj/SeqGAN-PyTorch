@@ -63,7 +63,7 @@ class DisDataIter(object):
         self.data = real_data_lis + fake_data_lis
         self.labels = [1 for _ in range(len(real_data_lis))] +\
                         [0 for _ in range(len(fake_data_lis))]
-        self.pairs = list(zip(self.data, self.labels))
+        self.pairs = list(zip(self.data, self.labels))   #形成 数据-标签 对
         self.data_num = len(self.pairs)
         self.indices = range(self.data_num)
         self.num_batches = int(math.ceil(float(self.data_num)/self.batch_size))
@@ -94,7 +94,7 @@ class DisDataIter(object):
         self.idx += self.batch_size
         return data, label
 
-    def read_file(self, data_file):
+    def read_file(self, data_file):  #同上部分，返回单词列表
         with open(data_file, 'r') as f:
             lines = f.readlines()
         lis = []
