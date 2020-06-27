@@ -30,7 +30,7 @@ class Discriminator(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: (batch_size * seq_len)
+            x: (batch_size * seq_len)    # x是生成的caption
         """
         emb = self.emb(x).unsqueeze(1)  # batch_size * 1 * seq_len * emb_dim
         convs = [F.relu(conv(emb)).squeeze(3) for conv in self.convs]  # [batch_size * num_filter * length]
