@@ -57,9 +57,9 @@ class TargetLSTM(nn.Module):
 
     def init_params(self):
         for param in self.parameters():
-            param.data.normal_(0, 1)
+            param.data.normal_(0, 1)     #不同：数据
 
-    def sample(self, batch_size, seq_len):
+    def sample(self, batch_size, seq_len):   #不同：x是None
         res = []
         with torch.no_grad():
             x = Variable(torch.zeros((batch_size, 1)).long())
