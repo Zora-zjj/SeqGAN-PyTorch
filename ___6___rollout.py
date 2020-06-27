@@ -16,12 +16,12 @@ from torch.autograd import Variable
 
 class Rollout(object):
     """Roll-out policy"""
-    def __init__(self, model, update_rate):
+    def __init__(self, model, update_rate):   #main函数中： rollout = Rollout(generator, 0.8)
         self.ori_model = model
         self.own_model = copy.deepcopy(model)
         self.update_rate = update_rate
 
-    def get_reward(self, x, num, discriminator):
+    def get_reward(self, x, num, discriminator):  #main函数中： rewards = rollout.get_reward(samples, 16, discriminator)
         """
         Args:
             x : (batch_size, seq_len) input data
@@ -52,7 +52,7 @@ class Rollout(object):
         rewards = np.transpose(np.array(rewards)) / (1.0 * num) # batch_size * seq_len
         return rewards
 
-    def update_params(self):
+    def update_params(self):  # main函数中： rollout.update_params()
         dic = {}
         for name, param in self.ori_model.named_parameters():
             dic[name] = param.data
