@@ -56,7 +56,7 @@ d_num_class = 2
 
 
 
-def generate_samples(model, batch_size, generated_num, output_file):
+def generate_samples(model, batch_size, generated_num, output_file):    #generate_samples(target_lstm, BATCH_SIZE, GENERATED_NUM, POSITIVE_FILE)
     samples = []
     for _ in range(int(generated_num / batch_size)):
         sample = model.sample(batch_size, g_sequence_len).cpu().data.numpy().tolist()
@@ -66,7 +66,7 @@ def generate_samples(model, batch_size, generated_num, output_file):
             string = ' '.join([str(s) for s in sample])
             fout.write('%s\n' % string)
 
-def train_epoch(model, data_iter, criterion, optimizer):
+def train_epoch(model, data_iter, criterion, optimizer):  # train_epoch(generator, gen_data_iter, gen_criterion, gen_optimizer)
     total_loss = 0.
     total_words = 0.
     for (data, target) in data_iter:#tqdm(
@@ -86,7 +86,7 @@ def train_epoch(model, data_iter, criterion, optimizer):
     data_iter.reset()
     return math.exp(total_loss / total_words)
 
-def eval_epoch(model, data_iter, criterion):
+def eval_epoch(model, data_iter, criterion):    #eval_epoch(target_lstm, eval_iter, gen_criterion)
     total_loss = 0.
     total_words = 0.
     with torch.no_grad():
@@ -148,7 +148,7 @@ def main():
         target_lstm = target_lstm.cuda()
     # Generate toy data using target lstm
     print('Generating data ...')
-    generate_samples(target_lstm, BATCH_SIZE, GENERATED_NUM, POSITIVE_FILE)
+    generate_samples(target_lstm, BATCH_SIZE, GENERATED_NUM, POSITIVE_FILE)  #上面函数
 
     # Load data from file
     gen_data_iter = GenDataIter(POSITIVE_FILE, BATCH_SIZE)
@@ -160,11 +160,11 @@ def main():
         gen_criterion = gen_criterion.cuda()
     print('Pretrain with MLE ...')
     for epoch in range(PRE_EPOCH_NUM):
-        loss = train_epoch(generator, gen_data_iter, gen_criterion, gen_optimizer)
+        loss = train_epoch(generator, gen_data_iter, gen_criterion, gen_optimizer)  #上面函数：train
         print('Epoch [%d] Model Loss: %f'% (epoch, loss))
         generate_samples(generator, BATCH_SIZE, GENERATED_NUM, EVAL_FILE)
         eval_iter = GenDataIter(EVAL_FILE, BATCH_SIZE)
-        loss = eval_epoch(target_lstm, eval_iter, gen_criterion)
+        loss = eval_epoch(target_lstm, eval_iter, gen_criterion)   #上面函数：eval
         print('Epoch [%d] True Loss: %f' % (epoch, loss))
 
     # Pretrain Discriminator
