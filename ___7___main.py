@@ -114,7 +114,7 @@ class GANLoss(nn.Module):
     def forward(self, prob, target, reward):
         """
         Args:
-            prob: (N, C), torch Variable
+            prob: (N, C), torch Variable     # 与NLLLoss区别：没有prob = weight * prob ，没有weight
             target : (N, ), torch Variable
             reward : (N, ), torch Variable
         """
@@ -129,7 +129,7 @@ class GANLoss(nn.Module):
         if prob.is_cuda:
             one_hot = one_hot.cuda()
         loss = torch.masked_select(prob, one_hot)
-        loss = loss * reward
+        loss = loss * reward         # 与NLLLoss区别：加了reward
         loss =  -torch.sum(loss)
         return loss
 
