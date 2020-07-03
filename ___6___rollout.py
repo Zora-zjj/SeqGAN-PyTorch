@@ -22,9 +22,9 @@ class Rollout(object):
         self.update_rate = update_rate
 
     def get_reward(self, x, num, discriminator):  #main函数中： rewards = rollout.get_reward(samples, 16, discriminator)
-        """
+        """                                       # Monte Carlo？？？
         Args:
-            x : (batch_size, seq_len) input data
+            x : (batch_size, seq_len) input data  #数据：单词id
             num : roll-out number
             discriminator : discrimanator model
         """
@@ -32,32 +32,32 @@ class Rollout(object):
         batch_size = x.size(0)
         seq_len = x.size(1)
         for i in range(num):
-            for l in range(1, seq_len):
-                data = x[:, 0:l]
-                samples = self.own_model.sample(batch_size, seq_len, data)
-                pred = discriminator(samples)
+            for l in range(1, seq_len):  #预测部分单词的句子    #l是前l个单词
+                data = x[:, 0:l]  
+                samples = self.own_model.sample(batch_size, seq_len, data)  #random.sample(list, 5)：从list中随机获取5个元素，作为一个片断返回
+                pred = discriminator(samples)  # 鉴别器分数
                 pred = pred.cpu().data[:,1].numpy()
                 if i == 0:
-                    rewards.append(pred)
+                    rewards.append(pred)  # i=0，rewards[0]=pred
                 else:
-                    rewards[l-1] += pred
+                    rewards[l-1] += pred  # i=1, rewards[l-1]=所有单词的reward，
 
-            # for the last token
+            # for the last token   
             pred = discriminator(x)
             pred = pred.cpu().data[:, 1].numpy()
             if i == 0:
                 rewards.append(pred)
             else:
-                rewards[seq_len-1] += pred
+                rewards[seq_len-1] += pred  #rewards是list，长度seq_len
         rewards = np.transpose(np.array(rewards)) / (1.0 * num) # batch_size * seq_len
         return rewards
 
-    def update_params(self):  # main函数中： rollout.update_params()
+    def update_params(self):  # main函数中： rollout.update_params()  参数的梯度更新
         dic = {}
-        for name, param in self.ori_model.named_parameters():
+        for name, param in self.ori_model.named_parameters():   # 字典{name:param}
             dic[name] = param.data
         for name, param in self.own_model.named_parameters():
             if name.startswith('emb'):
                 param.data = dic[name]
             else:
-                param.data = self.update_rate * param.data + (1 - self.update_rate) * dic[name]
+                param.data = self.update_rate * param.data + (1 - self.update_rate) * dic[name]  # lr*param+(1-lr)*dic[name]
