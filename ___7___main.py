@@ -111,7 +111,7 @@ class GANLoss(nn.Module):
     def __init__(self):
         super(GANLoss, self).__init__()
 
-    def forward(self, prob, target, reward):
+    def forward(self, prob, target, reward):   #多个reward
         """
         Args:
             prob: (N, C), torch Variable     # 与NLLLoss区别：没有prob = weight * prob ，没有weight
@@ -178,7 +178,8 @@ def main():
         dis_data_iter = DisDataIter(POSITIVE_FILE, NEGATIVE_FILE, BATCH_SIZE)
         for _ in range(3):
             loss = train_epoch(discriminator, dis_data_iter, dis_criterion, dis_optimizer)
-            print('Epoch [%d], loss: %f' % (epoch, loss))
+            print('Epoch [%d], loss: %f' % (epoch, loss))        #不需要验证集
+            
     # Adversarial Training
     rollout = Rollout(generator, 0.8)
     print('#####################################################')
@@ -194,10 +195,10 @@ def main():
     dis_optimizer = optim.Adam(discriminator.parameters())
     if opt.cuda:
         dis_criterion = dis_criterion.cuda()
-    for total_batch in range(TOTAL_BATCH):
+    for total_batch in range(TOTAL_BATCH):    # TOTAL_BATCH = 20
         ## Train the generator for one step
         for it in range(1):
-            samples = generator.sample(BATCH_SIZE, g_sequence_len)
+            samples = generator.sample(BATCH_SIZE, g_sequence_len)   #将上一个生成的单词作为下一个单词条件,x=None
             # construct the input to the genrator, add zeros before samples and delete the last column
             zeros = torch.zeros((BATCH_SIZE, 1)).type(torch.LongTensor)
             if samples.is_cuda:
@@ -221,7 +222,7 @@ def main():
             eval_iter = GenDataIter(EVAL_FILE, BATCH_SIZE)
             loss = eval_epoch(target_lstm, eval_iter, gen_criterion)
             print('Batch [%d] True Loss: %f' % (total_batch, loss))
-        rollout.update_params()
+        rollout.update_params()    #参数更新
 
         for _ in range(4):
             generate_samples(generator, BATCH_SIZE, GENERATED_NUM, NEGATIVE_FILE)
