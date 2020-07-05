@@ -32,7 +32,7 @@ class Rollout(object):
         batch_size = x.size(0)
         seq_len = x.size(1)
         for i in range(num):
-            for l in range(1, seq_len):  #预测部分单词的句子    #l是前l个单词
+            for l in range(1, seq_len):  #预测部分单词的句子    #l是前l个单词，不包括第seq_len个单词即最后一个单词在后面的# for the last token ？？？
                 data = x[:, 0:l]  
                 samples = self.own_model.sample(batch_size, seq_len, data)  #random.sample(list, 5)：从list中随机获取5个元素，作为一个片断返回
                 pred = discriminator(samples)  # 鉴别器分数
