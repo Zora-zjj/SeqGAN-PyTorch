@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+#注意：下面的data全是单词id形式，不是单词
 
 import os
 import random
@@ -37,9 +38,9 @@ class GenDataIter(object):
             raise StopIteration
         index = self.indices[self.idx:self.idx+self.batch_size]   #某个batch部分句子索引   [1,2,3,4]   [5,6,7,8]  [9,10,11,12]
         d = [self.data_lis[i] for i in index]                     #某个batch部分句子单词列表   [[a,man,],[],,, ]
-        d = torch.LongTensor(np.asarray(d, dtype='int64'))
-        data = torch.cat([torch.zeros(self.batch_size, 1).long(), d], dim=1)    # [batch_size,1]+[batch_size,单词长度] ,相当于在所有句子单词前加个0，[[0,a,man,],[0,],,, ]
-        target = torch.cat([d, torch.zeros(self.batch_size, 1).long()], dim=1)  #在所有句子单词后面加0，[[a,man,0],[,,0],,, ]
+        d = torch.LongTensor(np.asarray(d, dtype='int64'))        #转成tensor形式     #TypeError: int() argument must be a string, a bytes-like object or a number, not 'list'
+        data = torch.cat([torch.zeros(self.batch_size, 1).long(), d], dim=1)    # [batch_size,1]+[batch_size,单词长度] ,相当于在所有句子单词前加个0，[[0,a,man,],[0,],,, ]，开始标志？
+        target = torch.cat([d, torch.zeros(self.batch_size, 1).long()], dim=1)  #在所有句子单词后面加0，[[a,man,0],[,,0],,, ]，结束标志？
         self.idx += self.batch_size
         return data, target   #取某个batch的
 
