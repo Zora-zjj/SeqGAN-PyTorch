@@ -69,16 +69,16 @@ class DisDataIter(object):
         self.num_batches = int(math.ceil(float(self.data_num)/self.batch_size))
         self.idx = 0
 
-    def __len__(self):
+    def __len__(self): #同
         return self.num_batches
 
-    def __iter__(self):
+    def __iter__(self): #同
         return self
 
-    def __next__(self):
+    def __next__(self): #同
         return self.next()
 
-    def reset(self):
+    def reset(self): #同
         self.idx = 0
         random.shuffle(self.pairs)
 
@@ -89,12 +89,12 @@ class DisDataIter(object):
         pairs = [self.pairs[i] for i in index]
         data = [p[0] for p in pairs]   
         label = [p[1] for p in pairs]   
-        data = torch.LongTensor(np.asarray(data, dtype='int64'))   #[[a,man,],[],,, ]
+        data = torch.LongTensor(np.asarray(data, dtype='int64'))   #[[a,man,],[],,, ]，前后没加0
         label = torch.LongTensor(np.asarray(label, dtype='int64')) #[1,0,,,]
         self.idx += self.batch_size
         return data, label
 
-    def read_file(self, data_file):  #同上部分，返回单词列表
+    def read_file(self, data_file):  #同上部分，返回单词列表   #同
         with open(data_file, 'r') as f:
             lines = f.readlines()
         lis = []
