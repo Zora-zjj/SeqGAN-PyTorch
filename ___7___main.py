@@ -21,10 +21,10 @@ from rollout import Rollout
 from data_iter import GenDataIter, DisDataIter
 # ================== Parameter Definition =================
 
-parser = argparse.ArgumentParser(description='Training Parameter')
-parser.add_argument('--cuda', action='store', default=None, type=int)
-opt = parser.parse_args()
-print(opt)
+parser = argparse.ArgumentParser(description='Training Parameter')     #1
+parser.add_argument('--cuda', action='store', default=None, type=int)  #2  默认为None
+opt = parser.parse_args()                                              #3
+print(opt)                                                             #4  输出参数，cuda的选择
 
 # Basic Training Paramters
 SEED = 88
@@ -44,7 +44,7 @@ if opt.cuda is not None and opt.cuda >= 0:
 # Genrator Parameters
 g_emb_dim = 32
 g_hidden_dim = 32
-g_sequence_len = 20
+g_sequence_len = 20    # 生成的caption长度
 
 # Discriminator Parameters
 d_emb_dim = 64
@@ -52,19 +52,19 @@ d_filter_sizes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20]
 d_num_filters = [100, 200, 200, 200, 200, 100, 100, 100, 100, 100, 160, 160]
 
 d_dropout = 0.75
-d_num_class = 2
+d_num_class = 2   #输出是:句子是真是假
 
 
 
 def generate_samples(model, batch_size, generated_num, output_file):    #generate_samples(target_lstm, BATCH_SIZE, GENERATED_NUM, POSITIVE_FILE)
     samples = []
-    for _ in range(int(generated_num / batch_size)):
-        sample = model.sample(batch_size, g_sequence_len).cpu().data.numpy().tolist()
-        samples.extend(sample)
+    for _ in range(int(generated_num / batch_size)):    # 10000 / batch_size
+        sample = model.sample(batch_size, g_sequence_len).cpu().data.numpy().tolist()   # target_lstm.sample  x是none是生成caption，生成单词当下个单词
+        samples.extend(sample)   #[[],[],,,]
     with open(output_file, 'w') as fout:
         for sample in samples:
-            string = ' '.join([str(s) for s in sample])
-            fout.write('%s\n' % string)
+            string = ' '.join([str(s) for s in sample])  #s是单词
+            fout.write('%s\n' % string)  #一行行输入
 
 def train_epoch(model, data_iter, criterion, optimizer):  # train_epoch(generator, gen_data_iter, gen_criterion, gen_optimizer)
     total_loss = 0.
@@ -76,17 +76,17 @@ def train_epoch(model, data_iter, criterion, optimizer):  # train_epoch(generato
         if opt.cuda:
             data, target = data.cuda(), target.cuda()
         target = target.contiguous().view(-1)
-        pred = model.forward(data)
+        pred = model.forward(data)  # generator.forward生成caption，data当条件
         loss = criterion(pred, target)
         total_loss += loss.item()
-        total_words += data.size(0) * data.size(1)
+        total_words += data.size(0) * data.size(1)    # data:[b,seq_len]   总共有多少个单词
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    data_iter.reset()
-    return math.exp(total_loss / total_words)
+    data_iter.reset()      # reset函数：random.shuffle(self.data_lis)    #将句子单词列表打乱，为啥放在后面打散？？？
+    return math.exp(total_loss / total_words)   #每个单词的loss？
 
-def eval_epoch(model, data_iter, criterion):    #eval_epoch(target_lstm, eval_iter, gen_criterion)
+def eval_epoch(model, data_iter, criterion):    #eval_epoch(target_lstm, eval_iter, gen_criterion)   也有data当条件，没啥区别啊？？？
     total_loss = 0.
     total_words = 0.
     with torch.no_grad():
