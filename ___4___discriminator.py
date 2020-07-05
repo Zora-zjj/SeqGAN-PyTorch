@@ -19,7 +19,7 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.emb = nn.Embedding(vocab_size, emb_dim)
         self.convs = nn.ModuleList([
-            nn.Conv2d(1, n, (f, emb_dim)) for (n, f) in zip(num_filters, filter_sizes)
+            nn.Conv2d(1, n, (f, emb_dim)) for (n, f) in zip(num_filters, filter_sizes)   #多层卷积
         ])
         self.highway = nn.Linear(sum(num_filters), sum(num_filters))
         self.dropout = nn.Dropout(p=dropout)
@@ -30,7 +30,7 @@ class Discriminator(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: (batch_size * seq_len)    # x是生成的caption
+            x: (batch_size * seq_len)    # x是生成的caption的单词id
         """
         emb = self.emb(x).unsqueeze(1)  # batch_size * 1 * seq_len * emb_dim
         convs = [F.relu(conv(emb)).squeeze(3) for conv in self.convs]  # [batch_size * num_filter * length]
@@ -38,7 +38,7 @@ class Discriminator(nn.Module):
         pred = torch.cat(pools, 1)  # batch_size * num_filters_sum
         highway = self.highway(pred)
         pred = torch.sigmoid(highway) *  F.relu(highway) + (1. - torch.sigmoid(highway)) * pred
-        pred = self.softmax(self.lin(self.dropout(pred)))
+        pred = self.softmax(self.lin(self.dropout(pred)))   # [ , num_classes]
         return pred
 
     def init_parameters(self):
