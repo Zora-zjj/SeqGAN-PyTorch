@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# 注意： generetor与target_lstm区别：前者x可以是CNN提取的特征，后面x=None
 
 import os
 import random
