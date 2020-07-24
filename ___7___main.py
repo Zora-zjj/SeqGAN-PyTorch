@@ -184,33 +184,23 @@ def main():
     rollout = Rollout(generator, 0.8)
     print('#####################################################')
     print('Start Adeversatial Training...\n')
-    gen_gan_loss = GANLoss()
+    gen_gan_loss = GANLoss().to(device)
     gen_gan_optm = optim.Adam(generator.parameters())
-    if opt.cuda:
-        gen_gan_loss = gen_gan_loss.cuda()
-    gen_criterion = nn.NLLLoss(reduction='sum')
-    if opt.cuda:
-        gen_criterion = gen_criterion.cuda()
-    dis_criterion = nn.NLLLoss(reduction='sum')
+    gen_criterion = nn.NLLLoss(reduction='sum').to(device)
+    dis_criterion = nn.NLLLoss(reduction='sum').to(device)
     dis_optimizer = optim.Adam(discriminator.parameters())
-    if opt.cuda:
-        dis_criterion = dis_criterion.cuda()
     for total_batch in range(TOTAL_BATCH):    # TOTAL_BATCH = 20
         ## Train the generator for one step
         for it in range(1):
             samples = generator.sample(BATCH_SIZE, g_sequence_len)   #将上一个生成的单词作为下一个单词条件,x=None
             # construct the input to the genrator, add zeros before samples and delete the last column
-            zeros = torch.zeros((BATCH_SIZE, 1)).type(torch.LongTensor)
-            if samples.is_cuda:
-                zeros = zeros.cuda()
+            zeros = torch.zeros((BATCH_SIZE, 1)).type(torch.LongTensor).to(device)
             inputs = Variable(torch.cat([zeros, samples.data], dim = 1)[:, :-1].contiguous())
             targets = Variable(samples.data).contiguous().view((-1,))
             # calculate the reward
             rewards = rollout.get_reward(samples, 16, discriminator)
             rewards = Variable(torch.Tensor(rewards))
-            rewards = torch.exp(rewards).contiguous().view((-1,))
-            if opt.cuda:
-                rewards = rewards.cuda()
+            rewards = torch.exp(rewards).contiguous().view((-1,)).to(device)
             prob = generator.forward(inputs)
             loss = gen_gan_loss(prob, targets, rewards)
             gen_gan_optm.zero_grad()
