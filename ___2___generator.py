@@ -65,7 +65,6 @@ class Generator(nn.Module):  # LSTM模型
         flag = False # whether sample from zero
         if x is None:
             flag = True
-        if flag:
             x = Variable(torch.zeros((batch_size, 1)).long())
         if self.use_cuda:
             x = x.cuda()
