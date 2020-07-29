@@ -203,9 +203,9 @@ def main():
             rewards = torch.exp(rewards).contiguous().view((-1,)).to(device)
             prob = generator.forward(inputs)
             loss = gen_gan_loss(prob, targets, rewards)
-            gen_gan_optm.zero_grad()
-            loss.backward()
-            gen_gan_optm.step()
+            gen_gan_optm.zero_grad() #GANLoss
+            loss.backward()          #gen_gan_loss
+            gen_gan_optm.step()      #Adam
 
         if total_batch % 1 == 0 or total_batch == TOTAL_BATCH - 1:
             generate_samples(generator, BATCH_SIZE, GENERATED_NUM, EVAL_FILE)
