@@ -30,12 +30,12 @@ class Discriminator(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: (batch_size * seq_len)    # x是生成的caption的单词id
+            x: (batch_size,seq_len)    # x是生成的caption的单词id
         """
-        emb = self.emb(x).unsqueeze(1)  # batch_size * 1 * seq_len * emb_dim
-        convs = [F.relu(conv(emb)).squeeze(3) for conv in self.convs]  # [batch_size * num_filter * length]
-        pools = [F.max_pool1d(conv, conv.size(2)).squeeze(2) for conv in convs] # [batch_size * num_filter]
-        pred = torch.cat(pools, 1)  # batch_size * num_filters_sum
+        emb = self.emb(x).unsqueeze(1)  # [batch_size,1,seq_len,emb_dim]
+        convs = [F.relu(conv(emb)).squeeze(3) for conv in self.convs]  # [b,num_filter,length]
+        pools = [F.max_pool1d(conv, conv.size(2)).squeeze(2) for conv in convs] # [b,num_filter]
+        pred = torch.cat(pools, 1)  # [b, num_filters_sum]
         highway = self.highway(pred)
         pred = torch.sigmoid(highway) *  F.relu(highway) + (1. - torch.sigmoid(highway)) * pred
         pred = self.softmax(self.lin(self.dropout(pred)))   # [ , num_classes]
