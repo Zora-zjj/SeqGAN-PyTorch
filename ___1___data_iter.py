@@ -11,10 +11,10 @@ import numpy as np
 import torch
 class GenDataIter(object):
     """ Toy data iter to load digits"""
-    def __init__(self, data_file, batch_size):  #data_file一段文字
+    def __init__(self, data_file, batch_size):  #data_file一段文字，数据id
         super(GenDataIter, self).__init__()
         self.batch_size = batch_size
-        self.data_lis = self.read_file(data_file)  # data_lis：句子单词列表 [[a,man,],[],,, ]
+        self.data_lis = self.read_file(data_file)  # data_lis：句子单词列表 [[a,man,],[],,, ]对应的id
         self.data_num = len(self.data_lis)         # data_num：句子数量
         self.indices = range(self.data_num)        # indices : 句子数量的索引
         self.num_batches = int(math.ceil(float(self.data_num)/self.batch_size))   # num_batches :有几个batch   # ceil：向上取整
@@ -27,7 +27,7 @@ class GenDataIter(object):
         return self
 
     def __next__(self):
-        return self.next()   #下面函数
+        return self.next()   #下面函数   idx从0开始
 
     def reset(self):
         self.idx = 0
